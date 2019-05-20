@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="horizontal" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:weightSum="3"
+    >
+
+    <TextView
+        android:id="@+id/magnitudeTextView"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        tools:text="5.2"
+        android:gravity="center_vertical"
+        android:paddingLeft="16dp"
+        />
+    <TextView
+        android:id="@+id/placeTextView"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        tools:text="London"
+        android:gravity="center_vertical"
+        android:paddingLeft="16dp"
+        />
+    <TextView
+        android:id="@+id/dateTextView"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        tools:text="July 30, 2015"
+        android:gravity="center_vertical"
+        android:paddingLeft="16dp"
+        />
+
+
+</LinearLayout>

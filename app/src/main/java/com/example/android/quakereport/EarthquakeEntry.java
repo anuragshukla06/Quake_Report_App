@@ -4,20 +4,20 @@ public class EarthquakeEntry {
 
     private double mMagnitude;
     private String mPlace;
-    private String mDate;
+    private long mTimeInMilliseconds;
 
-    public EarthquakeEntry(double magnitude, String place, String date) {
+    public EarthquakeEntry(double magnitude, String place, long date) {
         mMagnitude = magnitude;
         mPlace = place;
-        mDate = date;
+        mTimeInMilliseconds = date;
     }
 
     public double getMagnitude() {
         return mMagnitude;
     }
 
-    public String getDate() {
-        return mDate;
+    public long getTimeInMillisecons() {
+        return mTimeInMilliseconds;
     }
 
     public String getPlace() {

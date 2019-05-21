@@ -15,8 +15,13 @@
  */
 package com.example.android.quakereport;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
@@ -32,7 +37,7 @@ public class EarthquakeActivity extends AppCompatActivity {
         setContentView(R.layout.earthquake_activity);
 
         // Create a fake list of earthquake locations.
-        ArrayList<EarthquakeEntry> earthquakes = QueryUtils.extractEarthquakeEntrys();
+        final ArrayList<EarthquakeEntry> earthquakes = QueryUtils.extractEarthquakeEntrys();
 //        earthquakes.add(new EarthquakeEntry(5.2, "San Francisco", "Feb 2, 2016"));
 //        earthquakes.add(new EarthquakeEntry(4.2, "London", "July 13, 2016"));
 //        earthquakes.add(new EarthquakeEntry(3.4, "Tokyo", "August 7, 2019"));
@@ -50,5 +55,16 @@ public class EarthquakeActivity extends AppCompatActivity {
         // Set the adapter on the {@link ListView}
         // so the list can be populated in the user interface
         earthquakeListView.setAdapter(earthquakeListAdapter);
+
+        earthquakeListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+                EarthquakeEntry entry = earthquakes.get(position);
+                String url = entry.getURL();
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                Log.i("url", url);
+                startActivity(intent);
+            }
+        });
     }
 }

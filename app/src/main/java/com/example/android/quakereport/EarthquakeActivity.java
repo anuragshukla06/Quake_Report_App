@@ -15,8 +15,11 @@
  */
 package com.example.android.quakereport;
 
+import android.app.LoaderManager;
 import android.content.Intent;
+import android.content.Loader;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -25,11 +28,23 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 
-public class EarthquakeActivity extends AppCompatActivity {
+public class EarthquakeActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<ArrayList<EarthquakeEntry>> {
 
     public static final String LOG_TAG = EarthquakeActivity.class.getName();
+    ListView earthquakeListView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,7 +52,7 @@ public class EarthquakeActivity extends AppCompatActivity {
         setContentView(R.layout.earthquake_activity);
 
         // Create a fake list of earthquake locations.
-        final ArrayList<EarthquakeEntry> earthquakes = QueryUtils.extractEarthquakeEntrys();
+
 //        earthquakes.add(new EarthquakeEntry(5.2, "San Francisco", "Feb 2, 2016"));
 //        earthquakes.add(new EarthquakeEntry(4.2, "London", "July 13, 2016"));
 //        earthquakes.add(new EarthquakeEntry(3.4, "Tokyo", "August 7, 2019"));
@@ -47,24 +62,136 @@ public class EarthquakeActivity extends AppCompatActivity {
 //        earthquakes.add(new EarthquakeEntry(4.3, "Rio de Janeiro", "Feb 2, 2016"));
 
         // Find a reference to the {@link ListView} in the layout
-        ListView earthquakeListView = (ListView) findViewById(R.id.list);
+        earthquakeListView = (ListView) findViewById(R.id.list);
+//        DataDownloader downloader = new DataDownloader();
+//        downloader.execute(USGS_URL);
+        getLoaderManager().initLoader(0, null, this).forceLoad();
 
-        // Create a new {@link ArrayAdapter} of earthquakes
-        EarthquakeListAdapter earthquakeListAdapter = new EarthquakeListAdapter(this, earthquakes);
+
+    }
+
+    @Override
+    public Loader<ArrayList<EarthquakeEntry>> onCreateLoader(int i, Bundle bundle) {
+        Log.i("loader", "loader called");
+        return new EarthquakeLoader(this);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<ArrayList<EarthquakeEntry>> loader, ArrayList<EarthquakeEntry> earthquakeEntries) {
+        EarthquakeListAdapter earthquakeListAdapter = new EarthquakeListAdapter(getApplicationContext(), earthquakeEntries);
 
         // Set the adapter on the {@link ListView}
         // so the list can be populated in the user interface
+        Log.i("finish", "onLoadFinished called");
         earthquakeListView.setAdapter(earthquakeListAdapter);
+        setItemOnListener(earthquakeEntries);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<ArrayList<EarthquakeEntry>> loader) {
+        Log.i("reset", "onLoaderReset called");
+
+    }
+
+//    private class DataDownloader extends AsyncTask<String, Void, ArrayList<EarthquakeEntry>> {
+//        @Override
+//        protected ArrayList<EarthquakeEntry> doInBackground(String... urls) {
+//            URL url = makeURL(urls[0]);
+//            String apiResponse = makeHttpRequest(url);
+//            ArrayList<EarthquakeEntry> earthquakeEntryResponse = QueryUtils.extractEarthquakeEntrys(apiResponse);
+//            return earthquakeEntryResponse;
+//        }
+//
+//        @Override
+//        protected void onPostExecute(ArrayList<EarthquakeEntry> earthquakeEntries) {
+//            super.onPostExecute(earthquakeEntries);
+//            // Create a new {@link ArrayAdapter} of earthquakes
+////            EarthquakeListAdapter earthquakeListAdapter = new EarthquakeListAdapter(getApplicationContext(), earthquakeEntries);
+////
+////            // Set the adapter on the {@link ListView}
+////            // so the list can be populated in the user interface
+////            earthquakeListView.setAdapter(earthquakeListAdapter);
+////            setItemOnListener(earthquakeEntries);
+//        }
+//    }
+
+    private void setItemOnListener (final ArrayList<EarthquakeEntry> earthquakeEntries) {
 
         earthquakeListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-                EarthquakeEntry entry = earthquakes.get(position);
+                EarthquakeEntry entry = earthquakeEntries.get(position);
                 String url = entry.getURL();
                 Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
                 Log.i("url", url);
                 startActivity(intent);
             }
         });
+
     }
+
+
+//    private URL makeURL(String urlString) {
+//
+//        URL url = null;
+//
+//        try {
+//            url = new URL(urlString);
+//        } catch (MalformedURLException e) {
+//            e.printStackTrace();
+//        }
+//
+//        return url;
+//    }
+//
+//    private String makeHttpRequest(URL url) {
+//
+//        HttpURLConnection httpURLConnection = null;
+//        InputStream inputStream = null;
+//        String result = null;
+//
+//        try {
+//            httpURLConnection = (HttpURLConnection) url.openConnection();
+//            httpURLConnection.setConnectTimeout(1000);
+//            httpURLConnection.setReadTimeout(1000);
+//            httpURLConnection.setRequestMethod("GET");
+//
+//            inputStream = httpURLConnection.getInputStream();
+//            result = readInputStream(inputStream);
+//
+//            return result;
+//
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//
+//        return null; // some error occured
+//
+//    }
+//
+//
+//    private String readInputStream(InputStream inputStream) {
+//        StringBuilder builder = new StringBuilder();
+//        String result;
+//
+//        InputStreamReader inputStreamReader = null;
+//        try {
+//            inputStreamReader = new InputStreamReader(inputStream, "UTF-8");
+//            BufferedReader reader = new BufferedReader(inputStreamReader);
+//            String data = reader.readLine();
+//
+//            while (data !=null) {
+//                builder.append(data);
+//                data = reader.readLine();
+//            }
+//
+//        return builder.toString();
+//
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//
+//        return null; // when some error occured, handle this case.
+//    }
+
 }

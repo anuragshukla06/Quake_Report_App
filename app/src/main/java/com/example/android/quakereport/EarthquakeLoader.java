@@ -23,6 +23,14 @@ public class EarthquakeLoader extends AsyncTaskLoader<ArrayList<EarthquakeEntry>
 
     @Override
     public ArrayList<EarthquakeEntry> loadInBackground() {
+
+        // Below code simulates slow internet connection
+//        try {
+//            Thread.sleep(2000);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
+
         URL url = makeURL(USGS_URL);
         String apiResponse = makeHttpRequest(url);
         ArrayList<EarthquakeEntry> earthquakeEntryResponse = QueryUtils.extractEarthquakeEntrys(apiResponse);

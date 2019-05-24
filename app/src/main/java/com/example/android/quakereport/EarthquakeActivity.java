@@ -16,8 +16,11 @@
 package com.example.android.quakereport;
 
 import android.app.LoaderManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.Loader;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -27,6 +30,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import org.json.JSONException;
@@ -47,6 +51,7 @@ public class EarthquakeActivity extends AppCompatActivity implements LoaderManag
     public static final String LOG_TAG = EarthquakeActivity.class.getName();
     ListView earthquakeListView;
     TextView emptyStateTextView;
+    ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,9 +71,24 @@ public class EarthquakeActivity extends AppCompatActivity implements LoaderManag
         // Find a reference to the {@link ListView} in the layout
         earthquakeListView = findViewById(R.id.list);
         emptyStateTextView = findViewById(R.id.emptyStateTextView);
+        progressBar = findViewById(R.id.progressBar);
 //        DataDownloader downloader = new DataDownloader();
 //        downloader.execute(USGS_URL);
-        getLoaderManager().initLoader(0, null, this).forceLoad();
+
+        ConnectivityManager cm =
+                (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        boolean isConnected = activeNetwork != null &&
+                activeNetwork.isConnectedOrConnecting();
+
+        if (!isConnected) {
+            emptyStateTextView.setText("No Internet Connection");
+            progressBar.setVisibility(View.INVISIBLE);
+        } else {
+
+            getLoaderManager().initLoader(0, null, this).forceLoad();
+        }
 
 
     }
@@ -85,8 +105,9 @@ public class EarthquakeActivity extends AppCompatActivity implements LoaderManag
 
         // Set the adapter on the {@link ListView}
         // so the list can be populated in the user interface
+        progressBar.setVisibility(View.GONE);
         Log.i("finish", "onLoadFinished called");
-        if (earthquakeEntries == null) {
+        if (earthquakeEntries == null || earthquakeEntries.size() == 0) {
             emptyStateTextView.setText("No earthquakes to display");
         } else {
             earthquakeListView.setAdapter(earthquakeListAdapter);
@@ -97,6 +118,7 @@ public class EarthquakeActivity extends AppCompatActivity implements LoaderManag
 
     @Override
     public void onLoaderReset(Loader<ArrayList<EarthquakeEntry>> loader) {
+        progressBar.setVisibility(View.VISIBLE);
         Log.i("reset", "onLoaderReset called");
 
     }

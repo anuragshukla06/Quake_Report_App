@@ -27,6 +27,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -45,6 +46,7 @@ public class EarthquakeActivity extends AppCompatActivity implements LoaderManag
 
     public static final String LOG_TAG = EarthquakeActivity.class.getName();
     ListView earthquakeListView;
+    TextView emptyStateTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,7 +64,8 @@ public class EarthquakeActivity extends AppCompatActivity implements LoaderManag
 //        earthquakes.add(new EarthquakeEntry(4.3, "Rio de Janeiro", "Feb 2, 2016"));
 
         // Find a reference to the {@link ListView} in the layout
-        earthquakeListView = (ListView) findViewById(R.id.list);
+        earthquakeListView = findViewById(R.id.list);
+        emptyStateTextView = findViewById(R.id.emptyStateTextView);
 //        DataDownloader downloader = new DataDownloader();
 //        downloader.execute(USGS_URL);
         getLoaderManager().initLoader(0, null, this).forceLoad();
@@ -83,8 +86,13 @@ public class EarthquakeActivity extends AppCompatActivity implements LoaderManag
         // Set the adapter on the {@link ListView}
         // so the list can be populated in the user interface
         Log.i("finish", "onLoadFinished called");
-        earthquakeListView.setAdapter(earthquakeListAdapter);
-        setItemOnListener(earthquakeEntries);
+        if (earthquakeEntries == null) {
+            emptyStateTextView.setText("No earthquakes to display");
+        } else {
+            earthquakeListView.setAdapter(earthquakeListAdapter);
+            earthquakeListView.setEmptyView(emptyStateTextView);
+            setItemOnListener(earthquakeEntries);
+        }
     }
 
     @Override
